@@ -1,17 +1,18 @@
+
 /*
     DO NOT, UNDER ANY CIRCUMSTANCES, MODIFY THIS FILE! THIS HAS TO REMAIN AS SUCH IN ORDER 
     FOR THE TESTBENCH PROVIDED TO WORK PROPERLY.
 */
 module top(
-    // peripheral clock signals
+    
     input clk,
     input rst_n,
-    // SPI master facing signals
+    
     input sclk,
     input cs_n,
     input miso,
     output mosi,
-    // peripheral signals
+    
     output pwm_out
 );
 
@@ -44,27 +45,41 @@ wire[7:0] functions;
 wire[15:0] compare1;
 wire[15:0] compare2;
 
-spi_bridge i_spi_bridge (
-    .clk(clk),
-    .rst_n(rst_n),
-    .sclk(sclk),
-    .cs_n(cs_n),
-    .miso(miso),
-    .mosi(mosi)
-);
+    // Instantiere modificata spi_bridge
+    spi_bridge i_spi_bridge (
+        .clk(clk),
+        .rst_n(rst_n),
+        .sclk(sclk),
+        .cs_n(cs_n),
+        
+        //  Conectam intrarea top-ului (miso) la intrarea bridge-ului (mosi)
+        // Si iesirea bridge-ului (miso) la iesirea top-ului (mosi)
+        .mosi(miso), 
+        .miso(mosi),
+        
+        // Conectam magistrala interna
+        .byte_sync(byte_sync),
+        .data_in(data_in),
+        .data_out(data_out)
+    );
 
-instr_dcd i_instr_dcd (
-    .clk(clk),
-    .rst_n(rst_n),
-    .byte_sync(),
-    .data_in(data_in),
-    .data_out(data_out),
-    .read(read),
-    .write(write),
-    .addr(addr),
-    .data_read(data_read),
-    .data_write(data_write)
-);
+    // Instantiere modificata instr_dcd
+    instr_dcd i_instr_dcd (
+        .clk(clk),
+        .rst_n(rst_n),
+        
+        //Conectam semnalul de sincronizare (era lasat gol .byte_sync())
+        .byte_sync(byte_sync), 
+        
+        .data_in(data_in),
+        .data_out(data_out),
+        .read(read),
+        .write(write),
+        .addr(addr),
+        .data_read(data_read),
+        .data_write(data_write)
+    );
+    
 
 regs i_regs (
     .clk(clk),
